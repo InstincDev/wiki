@@ -1,0 +1,15 @@
+{% extends "encyclopedia/layout.html" %} {% block title %} Search Results
+{%endblock %}
+
+{% block body %}
+<h1>Searching for... {{entry}}</h1>
+
+<ul>
+  {% for page in entries %}
+  {% if entry.upper in page.upper%} 
+  <a href="wiki/{{page}}"><li>{{ page }}</li></a>
+  {%endif%}
+  {% endfor %}
+</ul>
+
+{% endblock %}
