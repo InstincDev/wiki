@@ -1,15 +1,12 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django import forms
 
 from . import util
 # from wiki import encyclopedia
 
 # view for home page
-
-
-class NewEntryForm(forms.Form):
-    t = forms.CharField(label="Title")
-    c = forms.TextField(label="Content")
 
 
 def index(request):
@@ -38,9 +35,23 @@ def search_view(request):
         return render(request, "encyclopedia/search.html", {"entry": entry, "entries": util.list_entries()})
 
 
+class NewEntryForm(forms.Form):
+    t = forms.CharField(label="Entry")
+    c = forms.CharField(widget=forms.Textarea, label="Content")
+
+
 def new_entry_view(request):
-    form = NewEntryForm(request.POST)
-    if form.is_valid():
-        title = form.cleaned_data["title"]
-        content = form.cleaned_data["content"]
-    return render(request, "encyclopedia/new_entry.html")
+    if request.method == "POST":
+        form = NewEntryForm(request.POST)
+        if form.is_valid():
+            entry = form.cleaned_data["t"]
+            entryContent = form.cleaned_data["c"]
+            old_entry = util.list_entries()
+            for e in old_entry:
+                if(e == entry):
+                    return HttpResponseRedirect(reverse("encyclopedia/error2.html"))
+                else:
+                    util.save_entry(entry, entryContent)
+                    return HttpResponseRedirect(reverse("encyclopedia/entry.html", {"entryTitle": entry.upper, "entryContent": entryContent}))
+    else:
+        return render(request, "encyclopedia/new_entry.html", {"form": NewEntryForm()})
